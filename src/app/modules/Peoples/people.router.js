@@ -1,13 +1,13 @@
-const express = require('express');
-const { getUsers, createUser, getUserById, updateUser, deleteUser } = require('./people.controllar');
+import express from 'express';
+import { Users } from './people.controllar.js';
 
 const router = express.Router();
 
-// Define routes
-router.get('/', getUsers);         // GET all users
-router.post('/', createUser);      // Create new user
-router.get('/:id', getUserById);   // Get user by ID
-router.put('/:id', updateUser);    // Update user
-router.delete('/:id', deleteUser); // Delete user
 
-module.exports = { userRouter: router }; // ✅ Fixed export
+router.get('/', Users.getUsers);       
+router.post('/', Users.createUser);      
+router.get('/:id', Users.getUserById);  
+router.put('/:id', Users.updateUser);    
+router.delete('/:id', Users.deleteUser); 
+
+export const UserRoutes = router;

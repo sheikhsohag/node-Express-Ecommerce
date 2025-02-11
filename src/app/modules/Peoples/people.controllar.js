@@ -19,5 +19,6 @@ const getUsers = (req, res) => {
     res.status(200).json({ message: `User with ID ${req.params.id} deleted` });
   };
   
-  module.exports = { getUsers, createUser, getUserById, updateUser, deleteUser };
+  
+export const Users = { getUsers, createUser, getUserById, updateUser, deleteUser };
   

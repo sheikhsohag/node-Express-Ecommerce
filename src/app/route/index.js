@@ -1,5 +1,5 @@
-const express = require('express');
-const { userRouter } = require('../modules/Peoples/people.router');
+import express from 'express';
+import { UserRoutes } from '../modules/Peoples/people.router.js';
 
 
 const router = express.Router();
@@ -7,13 +7,13 @@ const router = express.Router();
 const modularRoutes = [
   {
     path: "/users",
-    route: userRouter
+    route: UserRoutes
   }
 ];
 
-// Apply routes dynamically
+
 modularRoutes.forEach(route => {
   router.use(route.path, route.route);
 });
 
-module.exports = router;
+export default router;
