@@ -1,11 +1,23 @@
-// people.controller.js
+import catchAsync from "../../utils/catchAsync.js";
+
 const getUsers = (req, res) => {
     res.status(200).json({ message: 'List of users' });
   };
   
-  const createUser = (req, res) => {
-    res.status(201).json({ message: 'User created successfully' });
-  };
+const registerUser = catchAsync(async (req, res) => {
+    const { username, email, password } = req.body;
+  
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'Email already exists' });
+    }
+  
+    const newUser = await User.create({ username, email, password });
+  
+    res.status(201).json({ success: true, message: 'User registered successfully', user: newUser });
+  });
+  
+ 
   
   const getUserById = (req, res) => {
     res.status(200).json({ message: `User with ID ${req.params.id}` });
@@ -20,5 +32,5 @@ const getUsers = (req, res) => {
   };
   
   
-export const Users = { getUsers, createUser, getUserById, updateUser, deleteUser };
+export const Users = { getUsers, registerUser, getUserById, updateUser, deleteUser };
   
