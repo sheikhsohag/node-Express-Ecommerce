@@ -6,7 +6,7 @@ const router = express.Router();
 
 const modularRoutes = [
   {
-    path: "/users",
+    path: "/user",
     route: UserRoutes
   }
 ];
