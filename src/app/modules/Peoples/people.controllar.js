@@ -9,10 +9,14 @@ const registerUser = catchAsync(async (req, res) => {
   
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ success: false, message: 'Email already exists' });
+      return res.status(400).json({ success: false, message: 'email already exists' });
     }
-  
-    const newUser = await User.create({ username, email, password });
+    const existingUserName = await User.findOne({ username });
+    if (existingUserName) {
+      return res.status(400).json({ success: false, message: 'username already exists' });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await User.create({ username, email, password: hashedPassword });
   
     res.status(201).json({ success: true, message: 'User registered successfully', user: newUser });
   });
