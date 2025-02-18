@@ -1,5 +1,7 @@
 import catchAsync from "../../utils/catchAsync.js";
 import User from "./people.models.js";
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const getUsers = (req, res) => {
   res.status(200).json({ message: 'List of users' });
@@ -46,9 +48,11 @@ const loginUser = catchAsync(async (req, res) => {
 
 
 
-const getUserById = (req, res) => {
-  res.status(200).json({ message: `User with ID ${req.params.id}` });
-};
+
+const getUserByEmail = catchAsync( async (req, res) => {
+  const user = await User.findOne({email});
+  res.status(200).json({ message: `User with ID ${req.body.email}` });
+});
 
 const updateUser = (req, res) => {
   res.status(200).json({ message: `User with ID ${req.params.id} updated` });
