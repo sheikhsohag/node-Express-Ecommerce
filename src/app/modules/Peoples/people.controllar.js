@@ -40,7 +40,7 @@ const loginUser = catchAsync(async (req, res) => {
   }
 
   const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
-    expiresIn: '1h',
+    expiresIn: '1d',
   });
   res.status(200).json({ token });
 
@@ -50,8 +50,9 @@ const loginUser = catchAsync(async (req, res) => {
 
 
 const getUserByEmail = catchAsync( async (req, res) => {
-  const user = await User.findOne({email});
-  res.status(200).json({ message: `User with ID ${req.body.email}` });
+  const email = req.body.email;
+  const user = await User.findOne({email}, {_id:0, __v:0, createdAt:0,updatedAt:0 });
+  res.status(200).json({ message: user });
 });
 
 const updateUser = (req, res) => {
@@ -63,4 +64,4 @@ const deleteUser = (req, res) => {
 };
 
 
-export const Users = { getUsers, registerUser, getUserById, updateUser, deleteUser, loginUser };
+export const Users = { getUsers, registerUser, getUserByEmail, updateUser, deleteUser, loginUser };
