@@ -1,13 +1,15 @@
 import express from 'express';
-import { Products } from './product.controller.js';
 import verifyToken from '../../middlewares/authMiddleware.js';
+import upload from '../../middlewares/fileHandler/multer.js';
+import { ProductController } from './product.controllar.js';
 
 const router = express.Router();
 
-router.post('/', verifyToken, Products.createProduct);
-router.get('/', Products.getProducts);
-router.get('/:id', Products.getProductById);
-router.put('/:id', verifyToken, Products.updateProduct);
-router.delete('/:id', verifyToken, Products.deleteProduct);
+
+router.post('/', verifyToken, upload.array('images', 5), ProductController.createProduct);
+router.get('/', ProductController.getProducts);
+router.get('/:id', ProductController.getProductById);
+router.put('/:id', verifyToken, upload.array('images', 5), ProductController.updateProduct);
+router.delete('/:id', verifyToken, ProductController.deleteProduct);
 
 export const ProductRoutes = router;

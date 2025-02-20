@@ -9,5 +9,6 @@ const productSchema = new mongoose.Schema({
     review: { type: [String], default: [] },
     images: { type: [String], default: [] }
 }, { timestamps: true });
+const Product = mongoose.model('Product', productSchema);
 
-module.exports = mongoose.model('Product', productSchema);
+export default Product;
