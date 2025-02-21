@@ -8,10 +8,53 @@ import Product from './product.models.js';
 
 const createProduct = catchAsync(async (req, res) => {
   try {
-    const { name, category, price, availableNumberOfProduct } = req.body;
-    const images = req.files ? req.files.map(file => file.path) : [];
+    let { name, category, price, availableNumberOfProduct, rating, review } = req.body;
+    // ✅ Extract images (ensure req.files is an array)
+    const images = req.files && req.files.length > 0 ? req.files.map(file => file.path) : [];
 
-    const product = await Product.create({ name, category, price, availableNumberOfProduct, images });
+    // ✅ Convert price and availableNumberOfProduct to numbers
+    price = parseFloat(price);
+    availableNumberOfProduct = parseInt(availableNumberOfProduct, 10);
+
+    // ✅ Convert rating from string to an array (only if provided)
+    if (rating) {
+      try {
+        rating = JSON.parse(rating);
+      } catch (error) {
+        return sendResponse(res, {
+          statusCode: httpStatus.BAD_REQUEST,
+          success: false,
+          message: 'Invalid rating format. Expected an array of numbers.'
+        });
+      }
+    } else {
+      rating = [];
+    }
+
+    // ✅ Convert review from string to an array (only if provided)
+    if (review) {
+      try {
+        review = JSON.parse(review);
+      } catch (error) {
+        return sendResponse(res, {
+          statusCode: httpStatus.BAD_REQUEST,
+          success: false,
+          message: 'Invalid review format. Expected an array of strings.'
+        });
+      }
+    } else {
+      review = [];
+    }
+
+    const product = await Product.create({
+      name,
+      category,
+      price,
+      availableNumberOfProduct,
+      images,
+      rating,
+      review
+    });
 
     sendResponse(res, {
       statusCode: httpStatus.CREATED,
@@ -26,6 +69,8 @@ const createProduct = catchAsync(async (req, res) => {
     throw error;
   }
 });
+
+
 
 // ✅ Get All Products
 const getProducts = catchAsync(async (req, res) => {
