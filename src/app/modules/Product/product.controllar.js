@@ -108,44 +108,90 @@ const getProductById = catchAsync(async (req, res) => {
 // ✅ Update Product (Replacing Old Images)
 
 const updateProduct = catchAsync(async (req, res) => {
-  const { name, category, price, availableNumberOfProduct } = req.body;
-  const newImages = req.files ? req.files.map(file => file.path) : [];
+  try {
+    const { name, category, price, availableNumberOfProduct, rating, review } = req.body;
+    const newImages = req.files && req.files.length > 0 ? req.files.map(file => file.path) : [];
 
-  const product = await Product.findById(req.params.id);
-  if (!product) {
-    return sendResponse(res, {
-      statusCode: httpStatus.NOT_FOUND,
-      success: false,
-      message: 'Product not found!',
-      data: null
-    });
-  }
+    // Find product by ID
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return sendResponse(res, {
+        statusCode: httpStatus.NOT_FOUND,
+        success: false,
+        message: 'Product not found!',
+        data: null
+      });
+    }
 
-  // ❌ Delete old images if new images are uploaded
-  if (newImages.length > 0) {
-    // Delete old images only if they exist
-    product.images.forEach(imagePath => {
-      const filePath = path.resolve(imagePath); // Resolving the full file path
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath); // Delete the file if it exists
+    // Convert numeric fields if they are provided
+    const updatedFields = {};
+    if (name) updatedFields.name = name;
+    if (category) updatedFields.category = category;
+    if (price) updatedFields.price = parseFloat(price);
+    if (availableNumberOfProduct) updatedFields.availableNumberOfProduct = parseInt(availableNumberOfProduct, 10);
+    
+    // Convert rating from string to array and push to existing list
+    if (rating) {
+      try {
+        const parsedRating = JSON.parse(rating);
+        if (!Array.isArray(parsedRating) || !parsedRating.every(num => typeof num === 'number')) {
+          throw new Error();
+        }
+        product.rating.push(...parsedRating);
+      } catch (error) {
+        return sendResponse(res, {
+          statusCode: httpStatus.BAD_REQUEST,
+          success: false,
+          message: 'Invalid rating format. Expected an array of numbers.'
+        });
       }
+    }
+
+    // Convert review from string to array and push to existing list
+    if (review) {
+      try {
+        const parsedReview = JSON.parse(review);
+        if (!Array.isArray(parsedReview) || !parsedReview.every(str => typeof str === 'string')) {
+          throw new Error();
+        }
+        product.review.push(...parsedReview);
+      } catch (error) {
+        return sendResponse(res, {
+          statusCode: httpStatus.BAD_REQUEST,
+          success: false,
+          message: 'Invalid review format. Expected an array of strings.'
+        });
+      }
+    }
+
+    // Handle images - Replace only if new images are uploaded
+    if (newImages.length > 0) {
+      // Delete old images if they exist
+      product.images.forEach(imagePath => {
+        const filePath = path.resolve(imagePath);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      });
+      updatedFields.images = newImages;
+    }
+
+    // Update product with new fields
+    Object.assign(product, updatedFields);
+    await product.save();
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Product updated successfully!',
+      data: product
     });
+  } catch (error) {
+    if (req.files) {
+      req.files.forEach(file => fs.unlinkSync(file.path));
+    }
+    throw error;
   }
-
-  product.name = name || product.name;
-  product.category = category || product.category;
-  product.price = price || product.price;
-  product.availableNumberOfProduct = availableNumberOfProduct || product.availableNumberOfProduct;
-  product.images = newImages.length > 0 ? newImages : product.images;
-
-  await product.save();
-
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Product updated successfully!',
-    data: product
-  });
 });
 
 
