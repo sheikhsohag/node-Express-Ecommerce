@@ -9,14 +9,13 @@ import Product from './product.models.js';
 const createProduct = catchAsync(async (req, res) => {
   try {
     let { name, category, price, availableNumberOfProduct, rating, review } = req.body;
-    // ✅ Extract images (ensure req.files is an array)
     const images = req.files && req.files.length > 0 ? req.files.map(file => file.path) : [];
 
-    // ✅ Convert price and availableNumberOfProduct to numbers
+    // Convert price and availableNumberOfProduct to numbers
     price = parseFloat(price);
     availableNumberOfProduct = parseInt(availableNumberOfProduct, 10);
 
-    // ✅ Convert rating from string to an array (only if provided)
+    // Convert rating and review from string to array if provided
     if (rating) {
       try {
         rating = JSON.parse(rating);
@@ -31,7 +30,6 @@ const createProduct = catchAsync(async (req, res) => {
       rating = [];
     }
 
-    // ✅ Convert review from string to an array (only if provided)
     if (review) {
       try {
         review = JSON.parse(review);
@@ -46,6 +44,9 @@ const createProduct = catchAsync(async (req, res) => {
       review = [];
     }
 
+    // Assuming `req.userId` is set from the `verifyToken` middleware
+    const createdBy = req.userId;  // This will be passed by the `verifyToken` middleware
+
     const product = await Product.create({
       name,
       category,
@@ -53,7 +54,8 @@ const createProduct = catchAsync(async (req, res) => {
       availableNumberOfProduct,
       images,
       rating,
-      review
+      review,
+      createdBy  
     });
 
     sendResponse(res, {

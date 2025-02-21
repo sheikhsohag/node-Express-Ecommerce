@@ -2,6 +2,7 @@ import express from 'express';
 import verifyToken from '../../middlewares/authMiddleware.js';
 import upload from '../../middlewares/fileHandler/multer.js';
 import { ProductController } from './product.controllar.js';
+import checkProductOwnership from '../../middlewares/Authorization/CheckProductOwnerOrAdmin.js';
 
 const router = express.Router();
 
