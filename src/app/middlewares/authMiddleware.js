@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import User from '../modules/Peoples/people.models.js';
 
 const verifyToken = (req, res, next) => {
   try {
@@ -13,10 +14,13 @@ const verifyToken = (req, res, next) => {
     // Decode the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
+    const user =  User.findById(decoded.userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    req.user = user;
     // Attach the decoded user data (usually the userId) to the request object
     req.userId = decoded.userId; 
-
-    // Proceed to the next middleware or controller
     next();
   } catch (error) {
     // Handle specific JWT errors
